@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="360dp"
+    android:height="180dp"
+    android:viewportWidth="360"
+    android:viewportHeight="180">
+    <!-- Deep Scholarly Indigo-Slate Background -->
+    <path android:pathData="M0,0h360v180h-360z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="360"
+                android:endY="180"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF0F172A" />
+                <item android:offset="0.5" android:color="#FF1E1B4B" />
+                <item android:offset="1.0" android:color="#FF064E3B" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Decorative Glowing Orbs -->
+    <path
+        android:fillColor="#2210B981"
+        android:pathData="M290,40m-65,0a65,65 0,1 1,130 0a65,65 0,1 1,-130 0" />
+    <path
+        android:fillColor="#22F59E0B"
+        android:pathData="M70,150m-55,0a55,55 0,1 1,110 0a55,55 0,1 1,-110 0" />
+
+    <!-- Server Cloud & MCQ Card Illustration on Right -->
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M216,28h114c6.6,0 12,5.4 12,12v100c0,6.6 -5.4,12 -12,12h-114c-6.6,0 -12,-5.4 -12,-12v-100c0,-6.6 5.4,-12 12,-12z" />
+    <!-- Option Rows inside Card -->
+    <path
+        android:fillColor="#FF10B981"
+        android:pathData="M222,48h16v16h-16z" />
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M246,52h70v8h-70z" />
+    <path
+        android:fillColor="#44FFFFFF"
+        android:pathData="M222,76h16v16h-16z" />
+    <path
+        android:fillColor="#88FFFFFF"
+        android:pathData="M246,80h58v8h-58z" />
+    <path
+        android:fillColor="#FFF59E0B"
+        android:pathData="M222,104h16v16h-16z" />
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M246,108h64v8h-64z" />
+</vector>

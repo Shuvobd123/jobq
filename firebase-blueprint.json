@@ -1,0 +1,277 @@
+{
+  "entities": {
+    "Question": {
+      "title": "Question",
+      "description": "An MCQ question managed from the cloud server question bank.",
+      "type": "object",
+      "properties": {
+        "authorId": {
+          "type": "string",
+          "description": "UID of the instructor/admin who created the question."
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Display name of the question author."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject category (e.g., সাধারণ জ্ঞান, বাংলা, ইংরেজি, গণিত, বিজ্ঞান)."
+        },
+        "topic": {
+          "type": "string",
+          "description": "Specific chapter or topic of the question."
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"],
+          "description": "Difficulty level of the MCQ."
+        },
+        "questionText": {
+          "type": "string",
+          "description": "The stem/prompt of the MCQ question."
+        },
+        "optionA": {
+          "type": "string",
+          "description": "Choice A text."
+        },
+        "optionB": {
+          "type": "string",
+          "description": "Choice B text."
+        },
+        "optionC": {
+          "type": "string",
+          "description": "Choice C text."
+        },
+        "optionD": {
+          "type": "string",
+          "description": "Choice D text."
+        },
+        "correctOptionIndex": {
+          "type": "integer",
+          "description": "0-based index (0 to 3) indicating the correct option."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "Detailed explanation or solution note shown after exam submission."
+        },
+        "marks": {
+          "type": "integer",
+          "description": "Points awarded for a correct answer."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Server control flag: whether this question is active and visible in live student exams."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the question was created via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the question was last updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "authorId",
+        "authorName",
+        "subject",
+        "topic",
+        "difficulty",
+        "questionText",
+        "optionA",
+        "optionB",
+        "optionC",
+        "optionD",
+        "correctOptionIndex",
+        "explanation",
+        "marks",
+        "isActive",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "An MCQ examination or model test configured and controlled from the cloud server.",
+      "type": "object",
+      "properties": {
+        "creatorId": {
+          "type": "string",
+          "description": "UID of the instructor/admin who created the exam."
+        },
+        "creatorName": {
+          "type": "string",
+          "description": "Display name of the exam creator."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the MCQ exam."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject filter for questions in this exam (or সব বিষয় for all subjects)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Instructions or syllabus description for students."
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "description": "Exam time limit in minutes."
+        },
+        "totalQuestions": {
+          "type": "integer",
+          "description": "Maximum number of MCQ questions included in the exam."
+        },
+        "negativeMarkPerWrong": {
+          "type": "integer",
+          "description": "Negative mark per wrong answer in hundredths (e.g., 25 = 0.25 mark penalty)."
+        },
+        "passPercentage": {
+          "type": "integer",
+          "description": "Minimum percentage score required to pass."
+        },
+        "isPublished": {
+          "type": "boolean",
+          "description": "Server control flag: whether students can currently see and take this exam."
+        },
+        "allowRetake": {
+          "type": "boolean",
+          "description": "Server control flag: whether students can retake this exam multiple times."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the exam was created via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the exam was updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "creatorId",
+        "creatorName",
+        "title",
+        "subject",
+        "description",
+        "durationMinutes",
+        "totalQuestions",
+        "negativeMarkPerWrong",
+        "passPercentage",
+        "isPublished",
+        "allowRetake",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ExamAttempt": {
+      "title": "ExamAttempt",
+      "description": "A student's completed MCQ exam submission and result sheet.",
+      "type": "object",
+      "properties": {
+        "studentId": {
+          "type": "string",
+          "description": "UID of the authenticated student who took the exam."
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Display name of the student."
+        },
+        "examId": {
+          "type": "string",
+          "description": "ID of the exam that was taken."
+        },
+        "examTitle": {
+          "type": "string",
+          "description": "Title of the exam at the time of submission."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the exam."
+        },
+        "totalQuestions": {
+          "type": "integer",
+          "description": "Total number of questions in the exam."
+        },
+        "answeredCount": {
+          "type": "integer",
+          "description": "Number of questions answered by the student."
+        },
+        "correctCount": {
+          "type": "integer",
+          "description": "Number of correct answers."
+        },
+        "wrongCount": {
+          "type": "integer",
+          "description": "Number of wrong answers."
+        },
+        "scoreHundredths": {
+          "type": "integer",
+          "description": "Final score multiplied by 100 (e.g., 1450 = 14.50 marks) after negative marking."
+        },
+        "maxMarks": {
+          "type": "integer",
+          "description": "Maximum possible marks for the exam."
+        },
+        "accuracyPercent": {
+          "type": "integer",
+          "description": "Percentage score (0 to 100)."
+        },
+        "passed": {
+          "type": "boolean",
+          "description": "Whether the student met the exam passPercentage threshold."
+        },
+        "timeTakenSeconds": {
+          "type": "integer",
+          "description": "Time spent by the student in seconds."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the attempt was submitted via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "studentId",
+        "studentName",
+        "examId",
+        "examTitle",
+        "subject",
+        "totalQuestions",
+        "answeredCount",
+        "correctCount",
+        "wrongCount",
+        "scoreHundredths",
+        "maxMarks",
+        "accuracyPercent",
+        "passed",
+        "timeTakenSeconds",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/questions/{questionId}": {
+      "schema": {
+        "$ref": "#/entities/Question"
+      },
+      "description": "Cloud question bank storing MCQ items controlled by instructors/admins and queried by students."
+    },
+    "/exams/{examId}": {
+      "schema": {
+        "$ref": "#/entities/Exam"
+      },
+      "description": "Cloud exams and model tests configured by instructors/admins and taken by students."
+    },
+    "/attempts/{attemptId}": {
+      "schema": {
+        "$ref": "#/entities/ExamAttempt"
+      },
+      "description": "Immutable student exam result submissions."
+    }
+  }
+}

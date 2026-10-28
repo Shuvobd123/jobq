@@ -1,0 +1,207 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        'email_verified' in request.auth.token &&
+        request.auth.token.email_verified == true &&
+        'email' in request.auth.token &&
+        request.auth.token.email == 'shuvo.shohidul21@gmail.com';
+    }
+
+    // 1. Question Validation Blueprint
+    function isValidQuestion(data) {
+      return data.authorId is string && data.authorId.size() >= 1 && data.authorId.size() <= 128 &&
+             data.authorName is string && data.authorName.size() >= 1 && data.authorName.size() <= 80 &&
+             data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 60 &&
+             data.topic is string && data.topic.size() >= 1 && data.topic.size() <= 100 &&
+             data.difficulty is string && (data.difficulty == 'easy' || data.difficulty == 'medium' || data.difficulty == 'hard') &&
+             data.questionText is string && data.questionText.size() >= 1 && data.questionText.size() <= 600 &&
+             data.optionA is string && data.optionA.size() >= 1 && data.optionA.size() <= 250 &&
+             data.optionB is string && data.optionB.size() >= 1 && data.optionB.size() <= 250 &&
+             data.optionC is string && data.optionC.size() >= 1 && data.optionC.size() <= 250 &&
+             data.optionD is string && data.optionD.size() >= 1 && data.optionD.size() <= 250 &&
+             data.correctOptionIndex is int && data.correctOptionIndex >= 0 && data.correctOptionIndex <= 3 &&
+             data.explanation is string && data.explanation.size() <= 600 &&
+             data.marks is int && data.marks >= 1 && data.marks <= 10 &&
+             data.isActive is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // 2. Exam Validation Blueprint
+    function isValidExam(data) {
+      return data.creatorId is string && data.creatorId.size() >= 1 && data.creatorId.size() <= 128 &&
+             data.creatorName is string && data.creatorName.size() >= 1 && data.creatorName.size() <= 80 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+             data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 60 &&
+             data.description is string && data.description.size() <= 400 &&
+             data.durationMinutes is int && data.durationMinutes >= 1 && data.durationMinutes <= 180 &&
+             data.totalQuestions is int && data.totalQuestions >= 1 && data.totalQuestions <= 100 &&
+             data.negativeMarkPerWrong is int && data.negativeMarkPerWrong >= 0 && data.negativeMarkPerWrong <= 100 &&
+             data.passPercentage is int && data.passPercentage >= 1 && data.passPercentage <= 100 &&
+             data.isPublished is bool &&
+             data.allowRetake is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // 3. ExamAttempt Validation Blueprint
+    function isValidAttempt(data) {
+      return data.studentId is string && data.studentId.size() >= 1 && data.studentId.size() <= 128 &&
+             data.studentName is string && data.studentName.size() >= 1 && data.studentName.size() <= 80 &&
+             data.examId is string && isValidId(data.examId) &&
+             data.examTitle is string && data.examTitle.size() >= 1 && data.examTitle.size() <= 120 &&
+             data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 60 &&
+             data.totalQuestions is int && data.totalQuestions >= 1 && data.totalQuestions <= 100 &&
+             data.answeredCount is int && data.answeredCount >= 0 && data.answeredCount <= data.totalQuestions &&
+             data.correctCount is int && data.correctCount >= 0 && data.correctCount <= data.answeredCount &&
+             data.wrongCount is int && data.wrongCount >= 0 && data.wrongCount <= data.answeredCount &&
+             data.scoreHundredths is int && data.scoreHundredths >= -10000 && data.scoreHundredths <= 100000 &&
+             data.maxMarks is int && data.maxMarks >= 1 && data.maxMarks <= 1000 &&
+             data.accuracyPercent is int && data.accuracyPercent >= 0 && data.accuracyPercent <= 100 &&
+             data.passed is bool &&
+             data.timeTakenSeconds is int && data.timeTakenSeconds >= 0 && data.timeTakenSeconds <= 10800 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    // Collection: /questions/{questionId}
+    match /questions/{questionId} {
+      allow get: if isSignedIn() && isValidId(questionId) &&
+                    (existing().isActive == true || existing().authorId == request.auth.uid || isAdmin());
+
+      allow list: if isSignedIn() &&
+                     (existing().isActive == true || existing().authorId == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+                       isValidId(questionId) &&
+                       incoming().authorId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'authorId', 'authorName', 'subject', 'topic', 'difficulty',
+                         'questionText', 'optionA', 'optionB', 'optionC', 'optionD',
+                         'correctOptionIndex', 'explanation', 'marks', 'isActive',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'authorId', 'authorName', 'subject', 'topic', 'difficulty',
+                         'questionText', 'optionA', 'optionB', 'optionC', 'optionD',
+                         'correctOptionIndex', 'explanation', 'marks', 'isActive',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidQuestion(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(questionId) &&
+                       isValidQuestion(incoming()) &&
+                       (existing().authorId == request.auth.uid || isAdmin()) &&
+                       incoming().authorId == existing().authorId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'authorName', 'subject', 'topic', 'difficulty',
+                         'questionText', 'optionA', 'optionB', 'optionC', 'optionD',
+                         'correctOptionIndex', 'explanation', 'marks', 'isActive',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(questionId) &&
+                       (existing().authorId == request.auth.uid || isAdmin());
+    }
+
+    // Collection: /exams/{examId}
+    match /exams/{examId} {
+      allow get: if isSignedIn() && isValidId(examId) &&
+                    (existing().isPublished == true || existing().creatorId == request.auth.uid || isAdmin());
+
+      allow list: if isSignedIn() &&
+                     (existing().isPublished == true || existing().creatorId == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+                       isValidId(examId) &&
+                       incoming().creatorId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'creatorId', 'creatorName', 'title', 'subject', 'description',
+                         'durationMinutes', 'totalQuestions', 'negativeMarkPerWrong',
+                         'passPercentage', 'isPublished', 'allowRetake',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'creatorId', 'creatorName', 'title', 'subject', 'description',
+                         'durationMinutes', 'totalQuestions', 'negativeMarkPerWrong',
+                         'passPercentage', 'isPublished', 'allowRetake',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidExam(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(examId) &&
+                       isValidExam(incoming()) &&
+                       (existing().creatorId == request.auth.uid || isAdmin()) &&
+                       incoming().creatorId == existing().creatorId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'creatorName', 'title', 'subject', 'description',
+                         'durationMinutes', 'totalQuestions', 'negativeMarkPerWrong',
+                         'passPercentage', 'isPublished', 'allowRetake',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(examId) &&
+                       (existing().creatorId == request.auth.uid || isAdmin());
+    }
+
+    // Collection: /attempts/{attemptId}
+    match /attempts/{attemptId} {
+      allow get: if isSignedIn() && isValidId(attemptId) &&
+                    (existing().studentId == request.auth.uid || isAdmin());
+
+      allow list: if isSignedIn() &&
+                     existing().studentId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(attemptId) &&
+                       incoming().studentId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'studentId', 'studentName', 'examId', 'examTitle', 'subject',
+                         'totalQuestions', 'answeredCount', 'correctCount', 'wrongCount',
+                         'scoreHundredths', 'maxMarks', 'accuracyPercent', 'passed',
+                         'timeTakenSeconds', 'createdAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'studentId', 'studentName', 'examId', 'examTitle', 'subject',
+                         'totalQuestions', 'answeredCount', 'correctCount', 'wrongCount',
+                         'scoreHundredths', 'maxMarks', 'accuracyPercent', 'passed',
+                         'timeTakenSeconds', 'createdAt'
+                       ]) &&
+                       isValidAttempt(incoming());
+
+      // Attempts are immutable once submitted
+      allow update, delete: if false;
+    }
+  }
+}

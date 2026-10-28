@@ -1,0 +1,6 @@
+{
+  "name": "Question Bank",
+  "description": "Cloud-managed MCQ Question Bank and Exam Platform for students and instructors.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
